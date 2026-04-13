@@ -68,7 +68,7 @@ export default async function ArticlePage({ params }: Props) {
               )}
               <div>
                 <span className="author-name">
-                  By <Link href={`/community/members/${article.author_username}`}>{article.author_name}</Link>
+                  By <span>{article.author_name}</span>
                 </span>
                 <span className="meta-divider"> · </span>
                 {article.published_at && (
