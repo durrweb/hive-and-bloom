@@ -13,20 +13,18 @@ export default async function DashboardPage() {
 
   const supabase = await createClient()
 
-  const [{ data: bookmarks }, { data: recentComments }] = await Promise.all([
-    supabase
-      .from('bookmarks')
-      .select('*, articles(*), recipes(*)')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(6),
-    supabase
-      .from('comments')
-      .select('*, articles(title, slug), recipes(title, slug)')
-      .eq('author_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(5),
-  ])
+const [{ data: bookmarks }, { data: recentComments }] = await Promise.all([
+  (supabase.from('bookmarks') as any)
+    .select('*, articles(*), recipes(*)')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(6),
+  (supabase.from('comments') as any)
+    .select('*, articles(title, slug), recipes(title, slug)')
+    .eq('author_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(5),
+])
 
   return (
     <div style={{ background: 'var(--cream)', minHeight: '100vh' }}>
