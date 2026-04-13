@@ -56,13 +56,13 @@ export async function postComment(formData: FormData) {
   if (!body || body.length < 3) return { error: 'Comment is too short.' }
   if (body.length > 2000)       return { error: 'Comment is too long (max 2000 chars).' }
 
-  const { error } = await supabase.from('comments').insert({
-    author_id: user.id,
-    body,
-    article_id: articleId || null,
-    recipe_id:  recipeId  || null,
-    parent_id:  parentId  || null,
-  })
+ const { error } = await supabase.from('comments').insert({
+  author_id: user.id,
+  body,
+  article_id: articleId || null,
+  recipe_id:  recipeId  || null,
+  parent_id:  parentId  || null,
+} as any)
   if (error) return { error: error.message }
 
   if (articleId) revalidatePath(`/articles/${formData.get('slug')}`)
