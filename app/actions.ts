@@ -126,13 +126,13 @@ export async function updateProfile(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated.' }
 
-  const { error } = await supabase.from('profiles').update({
-    display_name: formData.get('display_name') as string,
-    bio:          formData.get('bio')          as string,
-    location:     formData.get('location')     as string,
-    website_url:  formData.get('website_url')  as string,
-    hive_count:   parseInt(formData.get('hive_count') as string ?? '0', 10),
-  } as any).eq('id', user.id)
+const { error } = await (supabase.from('profiles') as any).update({
+  display_name: formData.get('display_name') as string,
+  bio:          formData.get('bio')          as string,
+  location:     formData.get('location')     as string,
+  website_url:  formData.get('website_url')  as string,
+  hive_count:   parseInt(formData.get('hive_count') as string ?? '0', 10),
+}).eq('id', user.id)
 
   if (error) return { error: error.message }
   revalidatePath('/community/settings')
