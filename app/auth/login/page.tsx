@@ -1,12 +1,18 @@
+'use client'
 // app/auth/login/page.tsx
-import type { Metadata } from 'next'
+import { useActionState } from 'react'
 import Link from 'next/link'
 import { signIn } from '@/app/actions'
 
-export const metadata: Metadata = { title: 'Sign In' }
+type State = { error?: string } | null
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ redirectTo?: string }> }) {
-  const { redirectTo } = await searchParams
+export default function LoginPage() {
+  const [state, action, isPending] = useActionState<State, FormData>(signIn, null)
+
+  // Read redirectTo from URL on the client
+  const redirectTo = typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search).get('redirectTo') ?? ''
+    : ''
 
   return (
     <div className="auth-page">
@@ -17,7 +23,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <h1>Welcome back</h1>
         <p className="auth-sub">Sign in to your account</p>
 
-        <form action={signIn} className="auth-form">
+        <form action={action} className="auth-form">
           {redirectTo && <input type="hidden" name="redirectTo" value={redirectTo} />}
 
           <div className="auth-field">
@@ -31,7 +37,16 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <div style={{ textAlign: 'right', marginTop: '-0.5rem', marginBottom: '1rem' }}>
             <Link href="/auth/forgot-password" className="forgot-link">Forgot password?</Link>
           </div>
-          <button type="submit" className="auth-btn">Sign in →</button>
+
+          {state?.error && (
+            <p style={{ color: '#C0392B', fontFamily: 'var(--font-dm-sans)', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+              {state.error}
+            </p>
+          )}
+
+          <button type="submit" className="auth-btn" disabled={isPending}>
+            {isPending ? 'Signing in…' : 'Sign in →'}
+          </button>
         </form>
 
         <p className="auth-switch">

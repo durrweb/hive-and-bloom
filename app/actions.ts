@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 
 // ── AUTH ──────────────────────────────────────────────────────────────────
 
-export async function signUp(formData: FormData) {
+export async function signUp(_prevState: unknown, formData: FormData) {
   const supabase = await createClient()
   const email    = formData.get('email') as string
   const password = formData.get('password') as string
@@ -24,7 +24,7 @@ export async function signUp(formData: FormData) {
   redirect('/')
 }
 
-export async function signIn(formData: FormData) {
+export async function signIn(_prevState: unknown, formData: FormData) {
   const supabase  = await createClient()
   const email     = formData.get('email') as string
   const password  = formData.get('password') as string

@@ -1,9 +1,10 @@
+'use client'
 // app/auth/signup/page.tsx
-import type { Metadata } from 'next'
+import { useActionState } from 'react'
 import Link from 'next/link'
 import { signUp } from '@/app/actions'
 
-export const metadata: Metadata = { title: 'Join the Hive' }
+type State = { error?: string } | null
 
 const PERKS = [
   '🐝 Weekly seasonal hive-management tips',
@@ -14,6 +15,8 @@ const PERKS = [
 ]
 
 export default function SignupPage() {
+  const [state, action, isPending] = useActionState<State, FormData>(signUp, null)
+
   return (
     <div className="auth-split-page">
       <div className="auth-split">
@@ -34,7 +37,7 @@ export default function SignupPage() {
           <h1>Create your account</h1>
           <p className="auth-sub">It&apos;s free and always will be</p>
 
-          <form action={signUp} className="auth-form">
+          <form action={action} className="auth-form">
             <div className="auth-field">
               <label htmlFor="username">Username</label>
               <input
@@ -57,8 +60,15 @@ export default function SignupPage() {
               <Link href="/terms">Terms of Service</Link> and{' '}
               <Link href="/privacy">Privacy Policy</Link>.
             </p>
-            <button type="submit" className="auth-btn">
-              Join the Hive — it&apos;s free →
+
+            {state?.error && (
+              <p style={{ color: '#C0392B', fontFamily: 'var(--font-dm-sans)', fontSize: '0.85rem' }}>
+                {state.error}
+              </p>
+            )}
+
+            <button type="submit" className="auth-btn" disabled={isPending}>
+              {isPending ? 'Creating account…' : "Join the Hive — it's free →"}
             </button>
           </form>
 
