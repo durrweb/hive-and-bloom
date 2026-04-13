@@ -84,19 +84,19 @@ export async function toggleBookmark(formData: FormData) {
   let query = supabase.from('bookmarks').select('id').eq('user_id', user.id)
   if (articleId) query = query.eq('article_id', articleId)
   if (recipeId)  query = query.eq('recipe_id',  recipeId)
-  const { data: existing } = await query.maybeSingle()
+ const { data: existing } = await query.maybeSingle()
 
-  if (existing) {
-    await supabase.from('bookmarks').delete().eq('id', existing.id)
-    return { bookmarked: false }
-  } else {
-    await supabase.from('bookmarks').insert({
-      user_id: user.id,
-      article_id: articleId || null,
-      recipe_id:  recipeId  || null,
-    })
-    return { bookmarked: true }
-  }
+if (existing) {
+  await supabase.from('bookmarks').delete().eq('id', (existing as any).id)
+  return { bookmarked: false }
+} else {
+  await supabase.from('bookmarks').insert({
+    user_id: user.id,
+    article_id: articleId || null,
+    recipe_id:  recipeId  || null,
+  } as any)
+  return { bookmarked: true }
+}
 }
 
 // ── NEWSLETTER ────────────────────────────────────────────────────────────
