@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  typedRoutes: true,
+  typedRoutes: false,
 }
 
 export default nextConfig
