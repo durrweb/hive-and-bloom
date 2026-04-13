@@ -35,7 +35,6 @@ export default async function RecipePage({ params }: Props) {
 
   const comments = await getComments(undefined, recipe.id)
 
-  // Group ingredients by section
   const ingredientSections = (recipe.ingredients ?? []).reduce<Record<string, typeof recipe.ingredients>>((acc, ing) => {
     const section = ing!.section ?? 'Ingredients'
     if (!acc[section]) acc[section] = []
@@ -44,21 +43,38 @@ export default async function RecipePage({ params }: Props) {
   }, {})
 
   return (
-    <div className="recipe-page">
+    <div>
       {/* Hero */}
-      <div className="recipe-hero" style={recipe.cover_image_url ? { backgroundImage: `url(${recipe.cover_image_url})` } : {}}>
+      <div
+        className="recipe-hero"
+        style={recipe.cover_image_url ? { backgroundImage: `url(${recipe.cover_image_url})` } : {}}
+      >
         <div className="recipe-hero-overlay" />
         <div className="container mx-auto px-5 lg:px-8" style={{ position: 'relative', zIndex: 1 }}>
           <nav className="breadcrumb">
             <Link href="/recipes">Recipes</Link>
-            {recipe.honey_variety && <><span> / </span><Link href={`/recipes?honey=${recipe.honey_variety}`}>{recipe.honey_variety.replace('_', ' ')}</Link></>}
+            {recipe.honey_variety && (
+              <>
+                <span> / </span>
+                <Link href={`/recipes?honey=${recipe.honey_variety}`}>
+                  {recipe.honey_variety.replace('_', ' ')}
+                </Link>
+              </>
+            )}
           </nav>
           <h1 className="recipe-title">{recipe.title}</h1>
           {recipe.subtitle && <p className="recipe-subtitle">{recipe.subtitle}</p>}
           <div className="recipe-meta-row">
-            {recipe.author_avatar && <img src={recipe.author_avatar} alt={recipe.author_name} className="author-avatar" />}
+            {recipe.author_avatar && (
+              <img src={recipe.author_avatar} alt={recipe.author_name} className="author-avatar" />
+            )}
             <span>By {recipe.author_name}</span>
-            {recipe.published_at && <><span className="dot">·</span><time>{new Date(recipe.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</time></>}
+            {recipe.published_at && (
+              <>
+                <span className="meta-divider"> · </span>
+                <time>{new Date(recipe.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -67,12 +83,12 @@ export default async function RecipePage({ params }: Props) {
       <div className="recipe-stats-bar">
         <div className="container mx-auto px-5 lg:px-8">
           <div className="recipe-stats">
-            {recipe.prep_time_mins  && <div className="stat-item"><span className="stat-label">Prep</span><span className="stat-val">{recipe.prep_time_mins} min</span></div>}
-            {recipe.cook_time_mins  && <div className="stat-item"><span className="stat-label">Cook</span><span className="stat-val">{recipe.cook_time_mins} min</span></div>}
-            {recipe.total_time_mins && <div className="stat-item"><span className="stat-label">Total</span><span className="stat-val">{recipe.total_time_mins} min</span></div>}
-            {recipe.servings        && <div className="stat-item"><span className="stat-label">Serves</span><span className="stat-val">{recipe.servings}</span></div>}
-            {recipe.difficulty      && <div className="stat-item"><span className="stat-label">Level</span><span className="stat-val" style={{ color: DIFF_COLOR[recipe.difficulty], textTransform: 'capitalize' }}>{recipe.difficulty}</span></div>}
-            {recipe.honey_variety   && <div className="stat-item"><span className="stat-label">Honey</span><span className="stat-val">🍯 {recipe.honey_variety.replace('_', ' ')}</span></div>}
+            {recipe.prep_time_mins  && <div className="recipe-stat-item"><span className="recipe-stat-label">Prep</span><span className="recipe-stat-val">{recipe.prep_time_mins} min</span></div>}
+            {recipe.cook_time_mins  && <div className="recipe-stat-item"><span className="recipe-stat-label">Cook</span><span className="recipe-stat-val">{recipe.cook_time_mins} min</span></div>}
+            {recipe.total_time_mins && <div className="recipe-stat-item"><span className="recipe-stat-label">Total</span><span className="recipe-stat-val">{recipe.total_time_mins} min</span></div>}
+            {recipe.servings        && <div className="recipe-stat-item"><span className="recipe-stat-label">Serves</span><span className="recipe-stat-val">{recipe.servings}</span></div>}
+            {recipe.difficulty      && <div className="recipe-stat-item"><span className="recipe-stat-label">Level</span><span className="recipe-stat-val" style={{ color: DIFF_COLOR[recipe.difficulty], textTransform: 'capitalize' }}>{recipe.difficulty}</span></div>}
+            {recipe.honey_variety   && <div className="recipe-stat-item"><span className="recipe-stat-label">Honey</span><span className="recipe-stat-val">🍯 {recipe.honey_variety.replace('_', ' ')}</span></div>}
           </div>
         </div>
       </div>
@@ -110,21 +126,20 @@ export default async function RecipePage({ params }: Props) {
                 )}
               </div>
 
-              {/* Honey info card */}
               {recipe.honey_variety && (
                 <div style={{ background: 'var(--honey-pale)', borderRadius: 12, padding: '1.25rem', marginTop: '1rem', border: '1px solid var(--cream-dark)' }}>
                   <h3 style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '0.75rem', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--honey-deep)', marginBottom: '0.5rem' }}>
                     🍯 About {recipe.honey_variety.replace('_', ' ')} honey
                   </h3>
-                  <Link href={`/articles?category=hive-products`} style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '0.82rem', color: 'var(--honey)', fontWeight: 500, textDecoration: 'none' }}>
+                  <Link href="/articles?category=hive-products" style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '0.82rem', color: 'var(--honey)', fontWeight: 500, textDecoration: 'none' }}>
                     Learn about honey varieties →
                   </Link>
                 </div>
               )}
             </aside>
 
-            {/* Steps / method */}
-            <div className="steps-col">
+            {/* Steps */}
+            <div>
               {recipe.description && (
                 <p style={{ fontFamily: 'var(--font-crimson)', fontSize: '1.15rem', color: 'var(--mist)', fontWeight: 300, marginBottom: '2rem', lineHeight: 1.7, fontStyle: 'italic', borderLeft: '4px solid var(--honey)', paddingLeft: '1.25rem' }}>
                   {recipe.description}
@@ -137,7 +152,7 @@ export default async function RecipePage({ params }: Props) {
 
               {(recipe.steps ?? []).length > 0 ? (
                 <ol style={{ listStyle: 'none', padding: 0 }}>
-                  {(recipe.steps ?? []).map((step) => (
+                  {(recipe.steps ?? []).map(step => (
                     <li key={step.id} style={{ display: 'flex', gap: '1.25rem', marginBottom: '2rem', alignItems: 'flex-start' }}>
                       <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--honey)', color: 'var(--forest)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-playfair)', fontWeight: 700, fontSize: '0.95rem', flexShrink: 0, marginTop: '0.15rem' }}>
                         {step.step_number}
@@ -177,36 +192,6 @@ export default async function RecipePage({ params }: Props) {
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .recipe-hero {
-          min-height: 380px; background: var(--forest); background-size: cover; background-position: center;
-          position: relative; display: flex; align-items: flex-end; padding: 4rem 0 3rem;
-        }
-        .recipe-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(20,40,20,0.92) 0%, rgba(20,40,20,0.5) 60%, transparent 100%); }
-        .breadcrumb { font-family: var(--font-dm-sans); font-size: 0.8rem; color: rgba(255,255,255,0.55); margin-bottom: 0.75rem; }
-        .breadcrumb a { color: rgba(255,255,255,0.55); text-decoration: none; }
-        .breadcrumb a:hover { color: var(--honey-light); }
-        .recipe-title { font-family: var(--font-playfair); font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700; color: white; line-height: 1.2; margin-bottom: 0.6rem; }
-        .recipe-subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.72); font-weight: 300; margin-bottom: 1rem; }
-        .recipe-meta-row { display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-dm-sans); font-size: 0.85rem; color: rgba(255,255,255,0.65); }
-        .author-avatar { width: 28px; height: 28px; border-radius: 50%; }
-        .dot { opacity: 0.4; }
-        .recipe-stats-bar { background: white; border-bottom: 1px solid var(--cream-dark); }
-        .recipe-stats { display: flex; gap: 0; overflow-x: auto; }
-        .stat-item { padding: 1rem 2rem; border-right: 1px solid var(--cream-dark); text-align: center; flex-shrink: 0; }
-        .stat-label { font-family: var(--font-dm-sans); font-size: 0.7rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mist); display: block; margin-bottom: 0.2rem; }
-        .stat-val { font-family: var(--font-playfair); font-size: 1.1rem; font-weight: 600; color: var(--forest); display: block; }
-        .recipe-body-wrap { padding: 3rem 0 4rem; }
-        .recipe-layout { display: grid; grid-template-columns: 280px 1fr; gap: 4rem; align-items: start; }
-        .ingredients-col { position: sticky; top: 80px; }
-        .ingredients-card { background: white; border-radius: 12px; border: 1px solid var(--cream-dark); padding: 1.5rem; }
-        .card-heading { font-family: var(--font-playfair); font-size: 1.2rem; font-weight: 700; color: var(--forest); margin-bottom: 1rem; }
-        @media (max-width: 900px) {
-          .recipe-layout { grid-template-columns: 1fr; }
-          .ingredients-col { position: static; }
-        }
-      `}</style>
     </div>
   )
 }

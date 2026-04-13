@@ -19,7 +19,7 @@ export default async function ArticlesPage({ searchParams }: Props) {
   const params = await searchParams
   const category = params.category
   const page     = parseInt(params.page ?? '1', 10)
-  const pageSize  = 12
+  const pageSize = 12
 
   const [articles, categories] = await Promise.all([
     getLatestArticles(pageSize, category),
@@ -29,7 +29,7 @@ export default async function ArticlesPage({ searchParams }: Props) {
   const activeCategory = categories.find(c => c.slug === category)
 
   return (
-    <div className="articles-page">
+    <div>
       {/* Page header */}
       <div className="page-hero">
         <div className="container mx-auto px-5 lg:px-8">
@@ -79,35 +79,6 @@ export default async function ArticlesPage({ searchParams }: Props) {
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        .page-hero {
-          background: var(--forest);
-          padding: 4rem 0 3rem;
-          border-bottom: 3px solid var(--honey);
-        }
-        .page-hero h1 {
-          font-family: var(--font-playfair);
-          font-size: clamp(2rem, 4vw, 3rem);
-          font-weight: 700; color: white; margin-bottom: 0.75rem;
-        }
-        .page-hero p { color: rgba(255,255,255,0.7); font-weight: 300; max-width: 600px; }
-        .category-tabs {
-          display: flex; gap: 0.5rem; flex-wrap: wrap;
-          padding-bottom: 1.5rem; border-bottom: 1px solid var(--cream-dark);
-        }
-        .tab-link {
-          font-family: var(--font-dm-sans); font-size: 0.82rem; font-weight: 500;
-          letter-spacing: 0.04em; padding: 0.4rem 0.9rem;
-          border-radius: 20px; text-decoration: none;
-          background: var(--cream-dark); color: var(--mist);
-          border: 1px solid transparent; transition: all 0.2s;
-          display: flex; align-items: center; gap: 0.35rem;
-        }
-        .tab-link:hover { background: var(--honey-pale); color: var(--honey-deep); }
-        .tab-link.active { background: var(--honey); color: var(--forest); font-weight: 500; }
-        .articles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
-      `}</style>
     </div>
   )
 }

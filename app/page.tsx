@@ -7,8 +7,9 @@ import CategoryGrid from '@/components/articles/CategoryGrid'
 import SeasonalPreview from '@/components/calendar/SeasonalPreview'
 import NewsletterForm from '@/components/community/NewsletterForm'
 import HeroStats from '@/components/layout/HeroStats'
+import HeroBackground from '@/components/layout/HeroBackground'
 
-export const revalidate = 3600 // ISR: revalidate every hour
+export const revalidate = 3600
 
 export default async function HomePage() {
   const [featuredArticles, latestArticles, featuredRecipes, categories] = await Promise.all([
@@ -24,10 +25,12 @@ export default async function HomePage() {
     <>
       {/* ── HERO ─────────────────────────────────────────── */}
       <section className="hero-section">
-        <div className="hero-bg-pattern" aria-hidden />
-        <div className="container mx-auto px-5 lg:px-8">
+        {/* Rotating background images */}
+        <HeroBackground />
+
+        <div className="container mx-auto px-5 lg:px-8" style={{ position: 'relative', zIndex: 1 }}>
           <div className="hero-grid">
-            <div className="hero-text">
+            <div>
               <span className="hero-tag">For Pollinators &amp; the People Who Love Them</span>
               <h1 className="hero-heading">
                 Where the <em>bees thrive,</em><br /> the garden blooms.
@@ -219,98 +222,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      <style jsx>{`
-        .hero-section {
-          background: var(--forest);
-          position: relative;
-          overflow: hidden;
-          padding: clamp(4rem, 10vw, 8rem) 0 clamp(3rem, 7vw, 6rem);
-        }
-        .hero-bg-pattern {
-          position: absolute; inset: 0;
-          background: radial-gradient(ellipse 70% 80% at 65% 40%, rgba(200,119,30,0.18) 0%, transparent 70%),
-                      radial-gradient(ellipse 50% 60% at 20% 80%, rgba(107,158,101,0.15) 0%, transparent 60%);
-          pointer-events: none;
-        }
-        .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
-        .hero-tag {
-          display: inline-block;
-          font-family: var(--font-dm-sans); font-size: 0.75rem; font-weight: 500;
-          letter-spacing: 0.12em; text-transform: uppercase;
-          color: var(--honey-light); background: rgba(200,119,30,0.2);
-          border: 1px solid rgba(200,119,30,0.4);
-          padding: 0.3rem 0.9rem; border-radius: 2px; margin-bottom: 1.25rem;
-        }
-        .hero-heading {
-          font-family: var(--font-playfair);
-          font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 700; line-height: 1.12;
-          color: white; letter-spacing: -0.02em; margin-bottom: 1.25rem;
-        }
-        .hero-heading em { color: var(--honey-light); }
-        .hero-desc { font-size: 1.1rem; font-weight: 300; color: rgba(255,255,255,0.75); line-height: 1.65; margin-bottom: 2rem; }
-        .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
-        .hero-featured-card {
-          background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
-          border-radius: 12px; padding: 2rem; backdrop-filter: blur(4px);
-        }
-        .hero-featured-title {
-          font-family: var(--font-playfair); font-size: 1.5rem; font-weight: 700;
-          color: white; line-height: 1.25; margin: 0.75rem 0;
-        }
-        .hero-featured-excerpt { font-size: 0.95rem; color: rgba(255,255,255,0.65); font-weight: 300; margin-bottom: 1.25rem; }
-        .hero-featured-link {
-          font-family: var(--font-dm-sans); font-size: 0.85rem; font-weight: 500;
-          letter-spacing: 0.06em; text-transform: uppercase;
-          color: var(--honey-light); text-decoration: none;
-        }
-        .section-white     { padding: clamp(4rem, 8vw, 7rem) 0; background: white; }
-        .section-cream     { padding: clamp(4rem, 8vw, 7rem) 0; background: var(--cream); }
-        .section-forest    { padding: clamp(4rem, 8vw, 7rem) 0; background: var(--forest); }
-        .section-honey-pale{ padding: clamp(4rem, 8vw, 7rem) 0; background: var(--honey-pale); }
-        .section-header-center { text-align: center; margin-bottom: clamp(2rem, 5vw, 3.5rem); }
-        .section-header-center h2 { font-size: clamp(1.9rem, 4vw, 2.8rem); font-weight: 700; color: var(--forest); }
-        .section-subtitle { font-size: 1.05rem; color: var(--mist); max-width: 560px; margin: 0.8rem auto 0; font-weight: 300; }
-        .section-header-split { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; margin-bottom: clamp(2rem, 4vw, 3rem); flex-wrap: wrap; }
-        .section-header-split h2 { font-size: clamp(1.75rem, 3.5vw, 2.4rem); font-weight: 700; color: var(--forest); }
-        .articles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; }
-        .recipes-grid  { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
-        .callout-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
-        .callout-cards { display: flex; flex-direction: column; gap: 1rem; }
-        .callout-card {
-          background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 12px; padding: 1.2rem 1.4rem;
-          display: flex; align-items: flex-start; gap: 1rem;
-        }
-        .callout-card-icon {
-          font-size: 1.5rem; flex-shrink: 0; width: 44px; height: 44px;
-          background: rgba(200,119,30,0.2); border-radius: 8px;
-          display: flex; align-items: center; justify-content: center;
-        }
-        .community-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
-        .community-grid h2 { font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 700; color: var(--forest); margin-bottom: 1rem; }
-        .community-perks { list-style: none; margin-bottom: 2rem; }
-        .community-perks li { display: flex; align-items: flex-start; gap: 0.9rem; padding: 0.55rem 0; border-bottom: 1px solid var(--cream-dark); font-size: 0.98rem; font-weight: 300; }
-        .community-perks li:last-child { border-bottom: none; }
-        .perk-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--honey); flex-shrink: 0; margin-top: 0.55rem; }
-        .final-cta-section {
-          padding: clamp(4rem, 8vw, 7rem) 0;
-          background: var(--honey);
-          position: relative; overflow: hidden;
-        }
-        .final-cta-section::before {
-          content: '🌸'; font-size: 12rem; position: absolute;
-          left: -3rem; top: 50%; transform: translateY(-50%); opacity: 0.12; pointer-events: none;
-        }
-        .final-cta-section::after {
-          content: '🌻'; font-size: 12rem; position: absolute;
-          right: -3rem; top: 50%; transform: translateY(-50%); opacity: 0.12; pointer-events: none;
-        }
-        @media (max-width: 900px) {
-          .hero-grid, .callout-grid, .community-grid { grid-template-columns: 1fr; }
-          .hero-featured-card { display: none; }
-        }
-      `}</style>
     </>
   )
 }
