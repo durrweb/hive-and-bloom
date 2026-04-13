@@ -25,9 +25,7 @@ export default async function HomePage() {
     <>
       {/* ── HERO ─────────────────────────────────────────── */}
       <section className="hero-section">
-        {/* Rotating background images */}
         <HeroBackground />
-
         <div className="container mx-auto px-5 lg:px-8" style={{ position: 'relative', zIndex: 1 }}>
           <div className="hero-grid">
             <div>
@@ -141,7 +139,7 @@ export default async function HomePage() {
         <div className="container mx-auto px-5 lg:px-8">
           <div className="section-header-split">
             <div>
-              <span className="eyebrow">Honey & Herb Recipes</span>
+              <span className="eyebrow">Honey &amp; Herb Recipes</span>
               <h2>From the <em style={{ color: 'var(--honey-deep)', fontStyle: 'italic' }}>hive to your table</em></h2>
             </div>
             <Link href="/recipes" className="btn btn-primary">Browse all recipes →</Link>
@@ -158,7 +156,7 @@ export default async function HomePage() {
       <section className="section-honey-pale" id="calendar">
         <div className="container mx-auto px-5 lg:px-8">
           <div className="section-header-center">
-            <span className="eyebrow">Seasonal Beekeeper's Calendar</span>
+            <span className="eyebrow">Seasonal Beekeeper&apos;s Calendar</span>
             <h2>Know what to do, <em style={{ color: 'var(--honey-deep)', fontStyle: 'italic' }}>when to do it</em></h2>
             <p className="section-subtitle">
               A month-by-month guide to hive management, garden tasks, and pollinator care through every season.
