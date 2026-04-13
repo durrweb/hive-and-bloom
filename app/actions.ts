@@ -112,7 +112,7 @@ export async function subscribeNewsletter(formData: FormData) {
   }
 
   const { error } = await supabase.from('newsletter_subscribers').upsert(
-    { email, first_name: firstName || null, interests, confirmed: false },
+    { email, first_name: firstName || null, interests, confirmed: false } as any,
     { onConflict: 'email', ignoreDuplicates: false }
   )
   if (error) return { error: error.message }
@@ -132,7 +132,7 @@ export async function updateProfile(formData: FormData) {
     location:     formData.get('location')     as string,
     website_url:  formData.get('website_url')  as string,
     hive_count:   parseInt(formData.get('hive_count') as string ?? '0', 10),
-  }).eq('id', user.id)
+  } as any).eq('id', user.id)
 
   if (error) return { error: error.message }
   revalidatePath('/community/settings')
