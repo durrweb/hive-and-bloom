@@ -1,4 +1,3 @@
-// next.config.ts
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
@@ -11,9 +10,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  experimental: {
-    typedRoutes: true,
-  },
+  typedRoutes: true,
 }
 
 export default nextConfig
