@@ -43,7 +43,7 @@ export async function signOut() {
 
 // ── COMMENTS ─────────────────────────────────────────────────────────────
 
-export async function postComment(formData: FormData) {
+export async function postComment(_prevState: unknown, formData: FormData) {
   const supabase   = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'You must be signed in to comment.' }
@@ -101,7 +101,7 @@ if (existing) {
 
 // ── NEWSLETTER ────────────────────────────────────────────────────────────
 
-export async function subscribeNewsletter(formData: FormData) {
+export async function subscribeNewsletter(_prevState: unknown, formData: FormData) {
   const supabase   = await createClient()
   const email      = (formData.get('email') as string)?.trim().toLowerCase()
   const firstName  = (formData.get('firstName') as string)?.trim()

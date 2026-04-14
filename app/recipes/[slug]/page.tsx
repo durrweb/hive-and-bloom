@@ -35,12 +35,12 @@ export default async function RecipePage({ params }: Props) {
 
   const comments = await getComments(undefined, recipe.id)
 
-  const ingredientSections = (recipe.ingredients ?? []).reduce<Record<string, typeof recipe.ingredients>>((acc, ing) => {
-    const section = ing!.section ?? 'Ingredients'
-    if (!acc[section]) acc[section] = []
-    acc[section]!.push(ing)
-    return acc
-  }, {})
+  const ingredientSections: Record<string, typeof recipe.ingredients> = {}
+  for (const ing of recipe.ingredients ?? []) {
+    const section = ing?.section ?? 'Ingredients'
+    if (!ingredientSections[section]) ingredientSections[section] = []
+    ingredientSections[section]!.push(ing)
+  }
 
   return (
     <div>

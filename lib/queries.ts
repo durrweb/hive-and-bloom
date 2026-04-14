@@ -35,7 +35,7 @@ export async function getArticleBySlug(slug: string): Promise<ArticleWithMeta | 
   if (error) { console.error('getArticleBySlug:', error); return null }
 
   // Increment view count (fire-and-forget)
-  supabase.from('articles').update({ views: (data?.views ?? 0) + 1 }).eq('slug', slug)
+  void (supabase as any).from('articles').update({ views: ((data as any)?.views ?? 0) + 1 }).eq('slug', slug)
 
   return data
 }
@@ -46,7 +46,7 @@ export async function getArticleTags(articleId: string): Promise<string[]> {
     .from('article_tags')
     .select('tag')
     .eq('article_id', articleId)
-  return data?.map(r => r.tag) ?? []
+  return (data as Array<{ tag: string }> ?? []).map(r => r.tag)
 }
 
 export async function searchArticles(query: string, limit = 20): Promise<ArticleWithMeta[]> {
@@ -89,19 +89,20 @@ export async function getLatestRecipes(limit = 12, honeyVariety?: string): Promi
 
 export async function getRecipeBySlug(slug: string): Promise<RecipeWithMeta | null> {
   const supabase = await createClient()
-  const { data: recipe, error } = await supabase
+  const { data: recipeRaw, error } = await supabase
     .from('published_recipes')
     .select('*')
     .eq('slug', slug)
     .single()
-  if (error || !recipe) return null
+  if (error || !recipeRaw) return null
+  const recipe = recipeRaw as any
 
   const [{ data: ingredients }, { data: steps }] = await Promise.all([
     supabase.from('recipe_ingredients').select('*').eq('recipe_id', recipe.id).order('sort_order'),
     supabase.from('recipe_steps').select('*').eq('recipe_id', recipe.id).order('step_number'),
   ])
 
-  supabase.from('recipes').update({ views: (recipe.views ?? 0) + 1 }).eq('slug', slug)
+  void (supabase as any).from('recipes').update({ views: (recipe.views ?? 0) + 1 }).eq('slug', slug)
 
   return { ...recipe, ingredients: ingredients ?? [], steps: steps ?? [] }
 }
@@ -153,7 +154,7 @@ export async function getComments(articleId?: string, recipeId?: string) {
   const supabase = await createClient()
   let query = supabase
     .from('comments')
-    .select(`*, profiles!author_id(username, display_name, avatar_url, is_expert)`)
+    .select(`*, author:profiles!author_id(username, display_name, avatar_url, is_expert)`)
     .eq('status', 'approved')
     .is('parent_id', null)
     .order('created_at', { ascending: false })
