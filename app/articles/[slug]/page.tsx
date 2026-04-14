@@ -110,7 +110,7 @@ export default async function ArticlePage({ params }: Props) {
               <div className="sidebar-block">
                 <h3 className="sidebar-heading">More Articles</h3>
                 <div className="related-list">
-                  {relatedArticles.filter(a => a.id !== article.id).slice(0, 3).map(a => (
+                 {relatedArticles.filter((a: any) => a.id !== article.id).slice(0, 3).map((a: any) => (
                     <Link key={a.id} href={`/articles/${a.slug}`} className="related-item">
                       <span className="related-cat">{a.category_icon} {a.category_name}</span>
                       <span className="related-title">{a.title}</span>
