@@ -8,8 +8,9 @@ import { createClient } from '@/lib/supabase/server'
 export const metadata: Metadata = { title: 'My Hive — Dashboard' }
 
 export default async function DashboardPage() {
-  const user = await getCurrentUser()
-  if (!user) redirect('/auth/login?redirectTo=/community/dashboard')
+ const userRaw = await getCurrentUser()
+if (!userRaw) redirect('/auth/login?redirectTo=/community/dashboard')
+const user = userRaw as any
 
   const supabase = await createClient()
 
