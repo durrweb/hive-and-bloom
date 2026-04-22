@@ -138,6 +138,7 @@ export interface SeasonalTask {
   title: string
   description: string | null
   category: string | null
+  difficulty: Difficulty | null
   priority: 'low' | 'medium' | 'high' | null
   sort_order: number
   created_at: string
