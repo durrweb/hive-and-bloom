@@ -129,6 +129,86 @@ export interface RecipeWithMeta extends Recipe {
   author_username: string
 }
 
+// ── SeasonalTask ───────────────────────────────────────────────────────────
+
+export interface SeasonalTask {
+  id: string
+  season: Season
+  month: string | null
+  title: string
+  description: string | null
+  category: string | null
+  priority: 'low' | 'medium' | 'high' | null
+  sort_order: number
+  created_at: string
+}
+
+// ── Pollinator ─────────────────────────────────────────────────────────────
+
+export interface Pollinator {
+  id: string
+  name: string
+  slug: string
+  type: PollinatorType
+  description: string | null
+  image_url: string | null
+  active_seasons: Season[]
+  created_at: string
+}
+
+// ── Plant ──────────────────────────────────────────────────────────────────
+
+export interface Plant {
+  id: string
+  name: string
+  slug: string
+  scientific_name: string | null
+  description: string | null
+  image_url: string | null
+  bloom_seasons: Season[]
+  native: boolean
+  created_at: string
+}
+
+// ── Comment ────────────────────────────────────────────────────────────────
+
+export interface Comment {
+  id: string
+  article_id: string | null
+  recipe_id: string | null
+  author_id: string
+  parent_id: string | null
+  body: string
+  status: CommentStatus
+  likes: number
+  created_at: string
+  updated_at: string
+  // Joined fields
+  author?: Pick<Profile, 'username' | 'display_name' | 'avatar_url' | 'is_expert'>
+  replies?: Comment[]
+}
+
+// ── Bookmark ───────────────────────────────────────────────────────────────
+
+export interface Bookmark {
+  id: string
+  user_id: string
+  article_id: string | null
+  recipe_id: string | null
+  created_at: string
+}
+
+// ── Newsletter subscriber ──────────────────────────────────────────────────
+
+export interface NewsletterSubscriber {
+  id: string
+  email: string
+  first_name: string | null
+  interests: string[] | null
+  confirmed: boolean
+  subscribed_at: string
+}
+
 // ── Junction table ─────────────────────────────────────────────────────────
 
 export interface ArticleCategoryRow {
@@ -206,8 +286,33 @@ export interface Database {
         Update: Partial<Recipe>
       }
       bookmarks: {
-        Row: { id: string; user_id: string; article_id: string | null; recipe_id: string | null; created_at: string }
-        Insert: Omit<{ id: string; user_id: string; article_id: string | null; recipe_id: string | null; created_at: string }, 'id' | 'created_at'>
+        Row: Bookmark
+        Insert: Omit<Bookmark, 'id' | 'created_at'>
+        Update: never
+      }
+      comments: {
+        Row: Comment
+        Insert: Omit<Comment, 'id' | 'created_at' | 'updated_at' | 'likes' | 'author' | 'replies'>
+        Update: Partial<Comment>
+      }
+      seasonal_tasks: {
+        Row: SeasonalTask
+        Insert: Omit<SeasonalTask, 'id' | 'created_at'>
+        Update: Partial<SeasonalTask>
+      }
+      pollinators: {
+        Row: Pollinator
+        Insert: Omit<Pollinator, 'id' | 'created_at'>
+        Update: Partial<Pollinator>
+      }
+      plants: {
+        Row: Plant
+        Insert: Omit<Plant, 'id' | 'created_at'>
+        Update: Partial<Plant>
+      }
+      newsletter_subscribers: {
+        Row: NewsletterSubscriber
+        Insert: Omit<NewsletterSubscriber, 'id' | 'subscribed_at'>
         Update: never
       }
     }
