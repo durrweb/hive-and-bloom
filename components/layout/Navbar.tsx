@@ -37,7 +37,8 @@ export default async function Navbar() {
       <div style={{
         maxWidth: 1140,
         margin: '0 auto',
-        padding: '0 clamp(1.25rem, 4vw, 2.5rem) 0 2.5rem',
+        paddingRight: 'clamp(1.25rem, 4vw, 2.5rem)',
+        paddingLeft: '2.5rem',
       }}>
         <div style={{
           display: 'flex',
