@@ -260,7 +260,7 @@ export function userCanAccess(
   if (contentTier === 'free') return true
   if (membershipExpires && new Date(membershipExpires) < new Date()) return false
   if (userTier === 'pro') return true
-  if (userTier === 'member') return contentTier === 'free' || contentTier === 'member'
+  if (userTier === 'member') return contentTier === 'member'
   return false
 }
 
