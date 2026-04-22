@@ -26,7 +26,7 @@ export default async function HomePage() {
       {/* ── HERO ─────────────────────────────────────────── */}
       <section className="hero-section">
         <HeroBackground />
-        <div className="container mx-auto px-5 lg:px-8" style={{ position: 'relative', zIndex: 1 }}>
+        <div className="container mx-auto px-5 lg:px-8" style={{ position: 'relative', zIndex: 1, paddingLeft: '2.5rem' }}>
           <div className="hero-grid">
             <div>
               <span className="hero-tag">For Pollinators &amp; the People Who Love Them</span>
