@@ -7,7 +7,6 @@ const NAV_LINKS = [
   { href: '/articles', label: 'Articles' },
   { href: '/recipes',  label: 'Recipes' },
   { href: '/calendar', label: 'Seasonal Guide' },
-  { href: '/community',label: 'Community' },
 ]
 
 const navLinkStyle = {
