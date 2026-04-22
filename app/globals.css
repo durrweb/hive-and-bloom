@@ -109,6 +109,31 @@
   background: var(--forest);
   padding: 4rem 0 3rem;
   border-bottom: 3px solid var(--honey);
+  position: relative;
+  overflow: hidden;
+}
+.page-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 80% at 65% 40%, rgba(200,119,30,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 20% 80%, rgba(107,158,101,0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+.page-hero::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 50%; height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='52'%3E%3Cpolygon points='30%2C2 58%2C17 58%2C47 30%2C50 2%2C47 2%2C17' fill='none' stroke='white' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  opacity: 0.04;
+  pointer-events: none;
+}
+.page-hero > div {
+  position: relative;
+  z-index: 1;
 }
 .page-hero h1 {
   font-family: var(--font-playfair), Georgia, serif;
