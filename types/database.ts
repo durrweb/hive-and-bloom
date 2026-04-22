@@ -358,5 +358,11 @@ export interface Database {
       published_articles: { Row: ArticleWithMeta }
       published_recipes:  { Row: RecipeWithMeta }
     }
+    Functions: {
+      get_articles_by_category: {
+        Args: { p_category_slug: string; p_limit: number }
+        Returns: ArticleWithMeta[]
+      }
+    }
   }
 }
