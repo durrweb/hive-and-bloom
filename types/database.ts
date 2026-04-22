@@ -104,11 +104,13 @@ export interface Recipe {
   id: string
   slug: string
   title: string
+  subtitle: string | null
   description: string | null
   cover_image_url: string | null
   author_id: string
   status: ContentStatus
   difficulty: Difficulty | null
+  honey_variety: string | null
   prep_time_mins: number | null
   cook_time_mins: number | null
   total_time_mins: number | null
@@ -123,10 +125,32 @@ export interface Recipe {
   updated_at: string
 }
 
+export interface RecipeIngredient {
+  id: string
+  recipe_id: string
+  section: string | null
+  name: string
+  amount: number | null
+  unit: string | null
+  sort_order: number
+}
+
+export interface RecipeStep {
+  id: string
+  recipe_id: string
+  step_number: number
+  title: string | null
+  body: string
+  tip: string | null
+  timer_secs: number | null
+}
+
 export interface RecipeWithMeta extends Recipe {
   author_name: string
   author_avatar: string | null
   author_username: string
+  ingredients: RecipeIngredient[]
+  steps: RecipeStep[]
 }
 
 // ── SeasonalTask ───────────────────────────────────────────────────────────
