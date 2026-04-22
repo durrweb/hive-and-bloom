@@ -1,5 +1,5 @@
 // types/database.ts
-// Updated: 2026-04-21 — added membership tiers & premium content fields
+// Updated: 2026-04-22 — many-to-many article categories via article_categories junction table
 
 export type ContentStatus   = 'draft' | 'published' | 'archived'
 export type AccessTier      = 'free' | 'member' | 'pro'
@@ -10,27 +10,7 @@ export type Difficulty      = 'beginner' | 'intermediate' | 'advanced'
 export type CommentStatus   = 'pending' | 'approved' | 'flagged' | 'removed'
 export type UserRole        = 'member' | 'author' | 'moderator' | 'admin'
 
-// ── Row types (what Supabase returns) ─────────────────────────────────────
-
-export interface Profile {
-  id: string
-  username: string
-  display_name: string | null
-  avatar_url: string | null
-  bio: string | null
-  location: string | null
-  hive_count: number
-  member_since: string
-  is_expert: boolean
-  role: UserRole
-  website_url: string | null
-  // ── Membership fields ──────────────────────────────
-  membership_tier: MembershipTier       // 'free' | 'member' | 'pro'
-  membership_expires: string | null     // ISO timestamp, null = active/lifetime
-  stripe_customer_id: string | null     // populated on first subscription
-  // ──────────────────────────────────────────────────
-  updated_at: string
-}
+// ── Category types ─────────────────────────────────────────────────────────
 
 export interface Category {
   id: string
@@ -44,6 +24,38 @@ export interface Category {
   created_at: string
 }
 
+/** A category as it appears in the article's categories JSON array */
+export interface ArticleCategory {
+  id: string
+  name: string
+  slug: string
+  color: string | null
+  icon: string | null
+  is_primary: boolean
+}
+
+// ── Profile ────────────────────────────────────────────────────────────────
+
+export interface Profile {
+  id: string
+  username: string
+  display_name: string | null
+  avatar_url: string | null
+  bio: string | null
+  location: string | null
+  hive_count: number
+  member_since: string
+  is_expert: boolean
+  role: UserRole
+  website_url: string | null
+  membership_tier: MembershipTier
+  membership_expires: string | null
+  stripe_customer_id: string | null
+  updated_at: string
+}
+
+// ── Article ────────────────────────────────────────────────────────────────
+
 export interface Article {
   id: string
   slug: string
@@ -53,21 +65,40 @@ export interface Article {
   body: string
   cover_image_url: string | null
   author_id: string
-  category_id: string | null
+  category_id: string | null          // primary category (convenience field)
   status: ContentStatus
   difficulty: Difficulty | null
   read_time_mins: number | null
   featured: boolean
   views: number
   likes: number
-  // ── Premium / access fields ────────────────────────
-  is_premium: boolean                   // quick flag for UI (lock icons, blur)
-  access_tier: AccessTier               // gate logic: 'free' | 'member' | 'pro'
-  // ──────────────────────────────────────────────────
+  is_premium: boolean
+  access_tier: AccessTier
   published_at: string | null
   created_at: string
   updated_at: string
 }
+
+/** Returned by the published_articles view — includes author, primary category, and full categories array */
+export interface ArticleWithMeta extends Article {
+  // Author
+  author_name: string
+  author_avatar: string | null
+  author_username: string
+
+  // Primary category (for card badges — backwards compatible)
+  category_name: string | null
+  category_slug: string | null
+  category_color: string | null
+  category_icon: string | null
+
+  // All categories (primary + secondary)
+  categories: ArticleCategory[]
+
+  tags?: string[]
+}
+
+// ── Recipe ─────────────────────────────────────────────────────────────────
 
 export interface Recipe {
   id: string
@@ -85,26 +116,11 @@ export interface Recipe {
   featured: boolean
   views: number
   likes: number
-  // ── Premium / access fields ────────────────────────
   is_premium: boolean
   access_tier: AccessTier
-  // ──────────────────────────────────────────────────
   published_at: string | null
   created_at: string
   updated_at: string
-}
-
-// Joined view types (from published_articles / published_recipes views)
-
-export interface ArticleWithMeta extends Article {
-  author_name: string
-  author_avatar: string | null
-  author_username: string
-  category_name: string | null
-  category_slug: string | null
-  category_color: string | null
-  category_icon: string | null
-  tags?: string[]
 }
 
 export interface RecipeWithMeta extends Recipe {
@@ -113,17 +129,21 @@ export interface RecipeWithMeta extends Recipe {
   author_username: string
 }
 
+// ── Junction table ─────────────────────────────────────────────────────────
+
+export interface ArticleCategoryRow {
+  article_id: string
+  category_id: string
+  is_primary: boolean
+}
+
 // ── Insert types ───────────────────────────────────────────────────────────
 
 export type InsertArticle = Omit<Article, 'id' | 'created_at' | 'updated_at' | 'views' | 'likes'>
 export type InsertRecipe  = Omit<Recipe,  'id' | 'created_at' | 'updated_at' | 'views' | 'likes' | 'total_time_mins'>
 
-// ── Utility: check access client-side ─────────────────────────────────────
+// ── Utility: client-side access check ─────────────────────────────────────
 
-/**
- * Returns true if the user's membership tier meets or exceeds the content's
- * access tier. Mirrors the can_access_content() Postgres function.
- */
 export function userCanAccess(
   userTier: MembershipTier,
   membershipExpires: string | null,
@@ -134,6 +154,20 @@ export function userCanAccess(
   if (userTier === 'pro') return true
   if (userTier === 'member') return contentTier === 'free' || contentTier === 'member'
   return false
+}
+
+// ── Utility: get primary category from article ────────────────────────────
+
+export function getPrimaryCategory(article: ArticleWithMeta): ArticleCategory | null {
+  if (!article.categories?.length) return null
+  return article.categories.find(c => c.is_primary) ?? article.categories[0]
+}
+
+// ── Utility: get secondary categories ────────────────────────────────────
+
+export function getSecondaryCategories(article: ArticleWithMeta): ArticleCategory[] {
+  if (!article.categories?.length) return []
+  return article.categories.filter(c => !c.is_primary)
 }
 
 // ── Database root type (for createClient generic) ──────────────────────────
@@ -155,6 +189,11 @@ export interface Database {
         Row: Article
         Insert: InsertArticle
         Update: Partial<Article>
+      }
+      article_categories: {
+        Row: ArticleCategoryRow
+        Insert: ArticleCategoryRow
+        Update: Partial<ArticleCategoryRow>
       }
       article_tags: {
         Row: { article_id: string; tag: string }
