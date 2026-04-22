@@ -313,6 +313,16 @@ export interface Database {
         Insert: InsertRecipe
         Update: Partial<Recipe>
       }
+      recipe_ingredients: {
+        Row: RecipeIngredient
+        Insert: Omit<RecipeIngredient, 'id'>
+        Update: Partial<RecipeIngredient>
+      }
+      recipe_steps: {
+        Row: RecipeStep
+        Insert: Omit<RecipeStep, 'id'>
+        Update: Partial<RecipeStep>
+      }
       bookmarks: {
         Row: Bookmark
         Insert: Omit<Bookmark, 'id' | 'created_at'>
