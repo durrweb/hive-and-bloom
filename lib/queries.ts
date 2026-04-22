@@ -16,12 +16,28 @@ export async function getFeaturedArticles(limit = 3): Promise<ArticleWithMeta[]>
   return data ?? []
 }
 
-export async function getLatestArticles(limit = 12, categorySlug?: string): Promise<ArticleWithMeta[]> {
+export async function getLatestArticles(
+  limit = 12,
+  categorySlug?: string
+): Promise<ArticleWithMeta[]> {
   const supabase = await createClient()
-  let query = supabase.from('published_articles').select('*').limit(limit)
-  if (categorySlug) query = query.eq('category_slug', categorySlug)
-  const { data, error } = await query
-  if (error) { console.error('getLatestArticles:', error); return [] }
+
+  // No category filter — simple query against the view
+  if (!categorySlug) {
+    const { data, error } = await supabase
+      .from('published_articles')
+      .select('*')
+      .limit(limit)
+    if (error) { console.error('getLatestArticles:', error); return [] }
+    return data ?? []
+  }
+
+  // Category filter — use RPC so primary AND secondary categories are matched
+  const { data, error } = await supabase.rpc('get_articles_by_category', {
+    p_category_slug: categorySlug,
+    p_limit:         limit,
+  })
+  if (error) { console.error('getLatestArticles (by category):', error); return [] }
   return data ?? []
 }
 
