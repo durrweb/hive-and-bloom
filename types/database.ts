@@ -134,12 +134,14 @@ export interface RecipeWithMeta extends Recipe {
 export interface SeasonalTask {
   id: string
   season: Season
-  month: string | null
+  month_start: number | null
+  month_end: number | null
   title: string
   description: string | null
   category: string | null
   difficulty: Difficulty | null
   priority: 'low' | 'medium' | 'high' | null
+  related_article_id: string | null
   sort_order: number
   created_at: string
 }
