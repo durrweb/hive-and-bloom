@@ -33,7 +33,7 @@ export async function getLatestArticles(
   }
 
   // Category filter — use RPC so primary AND secondary categories are matched
-  const { data, error } = await supabase.rpc('get_articles_by_category', {
+  const { data, error } = await (supabase as any).rpc('get_articles_by_category', {
     p_category_slug: categorySlug,
     p_limit:         limit,
   })
