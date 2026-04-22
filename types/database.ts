@@ -111,6 +111,7 @@ export interface Recipe {
   status: ContentStatus
   difficulty: Difficulty | null
   honey_variety: string | null
+  season_best: string | null
   prep_time_mins: number | null
   cook_time_mins: number | null
   total_time_mins: number | null
