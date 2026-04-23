@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getArticleBySlug, getArticleTags, getLatestArticles, getComments } from '@/lib/queries'
+import { markdownToHtml } from '@/lib/markdown'
 import CommentSection from '@/components/community/CommentSection'
 
 interface Props { params: Promise<{ slug: string }> }
@@ -33,9 +34,10 @@ export default async function ArticlePage({ params }: Props) {
 
   if (!article) notFound()
 
-  const [tags, articleComments] = await Promise.all([
+  const [tags, articleComments, bodyHtml] = await Promise.all([
     getArticleTags(article.id),
     getComments(article.id),
+    markdownToHtml(article.body),
   ])
 
   return (
@@ -91,7 +93,7 @@ export default async function ArticlePage({ params }: Props) {
           <div className="article-layout">
             {/* Main content */}
             <article className="prose-hive article-content">
-              <div dangerouslySetInnerHTML={{ __html: article.body }} />
+              <div dangerouslySetInnerHTML={{ __html: bodyHtml }} />
             </article>
 
             {/* Sidebar */}
