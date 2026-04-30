@@ -457,6 +457,29 @@ create view published_articles as
   where a.status = 'published'
   order by a.published_at desc;
 
+-- Articles by category — matches primary AND secondary via article_categories junction
+create or replace function get_articles_by_category(
+  p_category_slug text,
+  p_limit         int,
+  p_offset        int default 0
+)
+returns setof published_articles
+language sql stable security definer
+as $$
+  select pa.*
+  from   published_articles pa
+  where  exists (
+    select 1
+    from   article_categories ac
+    join   categories c on c.id = ac.category_id
+    where  ac.article_id = pa.id
+      and  c.slug = p_category_slug
+  )
+  order  by pa.published_at desc nulls last, pa.id desc
+  limit  p_limit
+  offset p_offset;
+$$;
+
 -- Published recipes with author info
 create view published_recipes as
   select

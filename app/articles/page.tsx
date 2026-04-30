@@ -20,9 +20,10 @@ export default async function ArticlesPage({ searchParams }: Props) {
   const category = params.category
   const page     = parseInt(params.page ?? '1', 10)
   const pageSize = 12
+  const offset   = (page - 1) * pageSize
 
   const [articles, categories] = await Promise.all([
-    getLatestArticles(pageSize, category),
+    getLatestArticles(pageSize, category, offset),
     getCategories(),
   ])
 

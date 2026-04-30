@@ -360,7 +360,7 @@ export interface Database {
     }
     Functions: {
       get_articles_by_category: {
-        Args: { p_category_slug: string; p_limit: number }
+        Args: { p_category_slug: string; p_limit: number; p_offset?: number }
         Returns: ArticleWithMeta[]
       }
     }

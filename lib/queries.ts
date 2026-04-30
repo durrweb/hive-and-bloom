@@ -18,7 +18,8 @@ export async function getFeaturedArticles(limit = 3): Promise<ArticleWithMeta[]>
 
 export async function getLatestArticles(
   limit = 12,
-  categorySlug?: string
+  categorySlug?: string,
+  offset = 0,
 ): Promise<ArticleWithMeta[]> {
   const supabase = await createClient()
 
@@ -27,7 +28,9 @@ export async function getLatestArticles(
     const { data, error } = await supabase
       .from('published_articles')
       .select('*')
-      .limit(limit)
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .order('id', { ascending: false })
+      .range(offset, offset + limit - 1)
     if (error) { console.error('getLatestArticles:', error); return [] }
     return data ?? []
   }
@@ -36,6 +39,7 @@ export async function getLatestArticles(
   const { data, error } = await (supabase as any).rpc('get_articles_by_category', {
     p_category_slug: categorySlug,
     p_limit:         limit,
+    p_offset:        offset,
   })
   if (error) { console.error('getLatestArticles (by category):', error); return [] }
   return data ?? []
