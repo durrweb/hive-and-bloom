@@ -78,6 +78,11 @@ export default async function Navbar() {
             {user ? (
               <>
                 <li>
+                  <Link href="/apiary" style={navLinkStyle}>
+                    My Apiary
+                  </Link>
+                </li>
+                <li>
                   <Link href="/community/dashboard" style={navLinkStyle}>
                     My Hive
                   </Link>
