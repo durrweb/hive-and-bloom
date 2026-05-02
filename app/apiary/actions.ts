@@ -285,6 +285,33 @@ export async function addReminder(_prev: ActionState, formData: FormData): Promi
   redirect(`/apiary/${hiveId}?tab=reminders`)
 }
 
+export async function deleteHive(hiveId: string): Promise<void> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  if (!await assertHiveOwner(supabase as any, hiveId, user.id)) return
+
+  // Clean up storage files before deleting DB rows
+  const [{ data: hivePhotos }, { data: inspPhotos }] = await Promise.all([
+    (supabase as any).from('hive_photos').select('storage_path').eq('hive_id', hiveId).eq('user_id', user.id),
+    (supabase as any).from('inspection_photos').select('storage_path').eq('hive_id', hiveId).eq('user_id', user.id),
+  ])
+
+  const paths = [
+    ...(hivePhotos ?? []).map((p: any) => p.storage_path),
+    ...(inspPhotos ?? []).map((p: any) => p.storage_path),
+  ]
+  if (paths.length > 0) {
+    await (supabase as any).storage.from('hive-photos').remove(paths)
+  }
+
+  await (supabase as any).from('hives').delete().eq('id', hiveId).eq('user_id', user.id)
+
+  revalidatePath('/apiary')
+  redirect('/apiary')
+}
+
 // ── Photos ────────────────────────────────────────────────────────────────────
 
 type PhotoResult = { id: string; url: string; storage_path: string; created_at: string } | { error: string }

@@ -11,6 +11,7 @@ import {
 import { getUserTier } from '@/lib/tier'
 import { removeSuper, completeReminder } from '@/app/apiary/actions'
 import HivePhotoManager from '@/app/apiary/HivePhotoManager'
+import HiveStatusControls from '@/app/apiary/HiveStatusControls'
 
 // ── Metadata ──────────────────────────────────────────────────────────────────
 
@@ -690,6 +691,8 @@ export default async function HivePage({ params, searchParams }: Props) {
         {activeTab === 'treatments'  && <TreatmentsTab  hiveId={hiveId} treatments={treatments} />}
         {activeTab === 'reminders'   && <RemindersTab   hiveId={hiveId} reminders={reminders} />}
         {activeTab === 'photos'      && <HivePhotoManager hiveId={hiveId} userId={user.id} initialPhotos={hivePhotos} isPro={isPro} />}
+
+        <HiveStatusControls hiveId={hiveId} currentStatus={hive.status} />
       </div>
     </div>
   )

@@ -73,8 +73,10 @@ export default async function ApiaryPage() {
       .gte('inspected_at', startOfMonth),
   ])
 
-  const activeCount  = hives.filter(h => h.status === 'active').length
-  const atFreeLimit  = tier === 'free' && hives.length >= FREE_HIVE_LIMIT
+  const activeHives   = hives.filter(h => h.status === 'active')
+  const archivedHives = hives.filter(h => h.status !== 'active')
+  const activeCount   = activeHives.length
+  const atFreeLimit   = tier === 'free' && hives.length >= FREE_HIVE_LIMIT
 
   return (
     <div style={{ background: 'var(--cream)', minHeight: '100vh' }}>
@@ -187,9 +189,9 @@ export default async function ApiaryPage() {
         </div>
 
         {/* Hive grid */}
-        {hives.length > 0 ? (
+        {activeHives.length > 0 ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
-            {hives.map(hive => {
+            {activeHives.map(hive => {
               const score      = healthScore(hive)
               const { color, label } = healthMeta(score)
               const overdue    = isOverdue(hive.last_inspection_at)
@@ -316,12 +318,10 @@ export default async function ApiaryPage() {
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🐝</div>
             <h3 style={{
               fontFamily: 'var(--font-playfair), Georgia, serif',
-              fontSize: '1.4rem',
-              fontWeight: 700,
-              color: 'var(--forest)',
-              marginBottom: '0.5rem',
+              fontSize: '1.4rem', fontWeight: 700,
+              color: 'var(--forest)', marginBottom: '0.5rem',
             }}>
-              No hives yet
+              No active hives
             </h3>
             <p style={{ color: 'var(--mist)', maxWidth: 360, margin: '0 auto 1.5rem', textAlign: 'center' }}>
               Add your first hive to start tracking inspections, queens, honey supers, and treatments.
@@ -330,6 +330,75 @@ export default async function ApiaryPage() {
               + Add Your First Hive
             </Link>
           </div>
+        )}
+
+        {/* Inactive / lost hives */}
+        {archivedHives.length > 0 && (
+          <details style={{ marginTop: '2.5rem' }}>
+            <summary style={{
+              fontFamily: 'var(--font-dm-sans), sans-serif',
+              fontSize: '0.85rem', fontWeight: 600,
+              color: 'var(--mist)', letterSpacing: '0.04em',
+              cursor: 'pointer', userSelect: 'none',
+              listStyle: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem',
+            }}>
+              <span style={{ fontSize: '0.7rem' }}>▶</span>
+              Inactive &amp; Lost Hives ({archivedHives.length})
+            </summary>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem', marginTop: '1.25rem', opacity: 0.75 }}>
+              {archivedHives.map(hive => {
+                const score           = healthScore(hive)
+                const { color, label } = healthMeta(score)
+                const overdue         = isOverdue(hive.last_inspection_at)
+                const lastSeen        = relativeDate(hive.last_inspection_at)
+                return (
+                  <Link
+                    key={hive.id}
+                    href={`/apiary/${hive.id}`}
+                    className="card"
+                    style={{ textDecoration: 'none', display: 'block', padding: '1.4rem 1.5rem' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '1rem' }}>
+                      <div style={{ minWidth: 0 }}>
+                        <h3 style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontSize: '1.15rem', fontWeight: 700, color: 'var(--forest)', lineHeight: 1.2, marginBottom: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {hive.name}
+                        </h3>
+                        {hive.location && (
+                          <span style={{ fontFamily: 'var(--font-dm-sans), sans-serif', fontSize: '0.8rem', color: 'var(--mist)' }}>
+                            📍 {hive.location}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.3rem', flexShrink: 0 }}>
+                        {hive.hive_type && (
+                          <span className="tag-pill" style={{ background: 'var(--forest-pale)', color: 'var(--forest-mid)', fontSize: '0.63rem' }}>
+                            {hive.hive_type}
+                          </span>
+                        )}
+                        <span className="tag-pill" style={{ background: hive.status === 'lost' ? '#fee2e2' : 'var(--cream-dark)', color: hive.status === 'lost' ? 'var(--coral)' : 'var(--mist)', fontSize: '0.63rem' }}>
+                          {hive.status}
+                        </span>
+                      </div>
+                    </div>
+                    <div style={{ marginBottom: '1rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.3rem' }}>
+                        <span style={{ fontFamily: 'var(--font-dm-sans), sans-serif', fontSize: '0.68rem', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mist)' }}>Colony Health</span>
+                        <span style={{ fontFamily: 'var(--font-dm-sans), sans-serif', fontSize: '0.72rem', fontWeight: 600, color }}>{label}</span>
+                      </div>
+                      <div style={{ height: 5, background: 'var(--cream-dark)', borderRadius: 3 }}>
+                        <div style={{ height: '100%', width: `${score}%`, background: color, borderRadius: 3 }} />
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ fontFamily: 'var(--font-dm-sans), sans-serif', fontSize: '0.8rem', color: 'var(--honey)', fontWeight: 500 }}>
+                        View hive →
+                      </span>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </details>
         )}
       </div>
     </div>
