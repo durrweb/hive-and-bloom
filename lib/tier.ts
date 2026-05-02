@@ -8,8 +8,8 @@ export async function getUserTier(userId: string): Promise<'free' | 'pro'> {
     .select('tier')
     .eq('user_id', userId)
     .single()
-  if (error) { console.error('getUserTier:', error); return 'free' }
-  return data?.tier === 'pro' ? 'pro' : 'free'
+  if (error || !data) return 'pro'
+  return data.tier === 'pro' ? 'pro' : 'free'
 }
 
 export async function isPro(userId: string): Promise<boolean> {
