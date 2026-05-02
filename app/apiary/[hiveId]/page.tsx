@@ -27,6 +27,28 @@ interface Props {
 const TABS = ['inspections', 'queen', 'supers', 'treatments', 'reminders', 'photos'] as const
 type Tab = typeof TABS[number]
 
+// ── Origin helpers ────────────────────────────────────────────────────────────
+
+const ORIGIN_LABEL: Record<string, string> = {
+  swarm:    'Caught swarm',
+  split:    'Split',
+  package:  'Package',
+  nuc:      'Nucleus (nuc)',
+  cutout:   'Cutout',
+  transfer: 'Gift / transfer',
+  other:    'Other',
+}
+
+const ORIGIN_SOURCE_LABEL: Record<string, string> = {
+  swarm:    'Source hive',
+  split:    'Source hive',
+  package:  'Purchased from',
+  nuc:      'Purchased from',
+  cutout:   'Location',
+  transfer: 'From',
+  other:    'Source',
+}
+
 // ── Formatting helpers ────────────────────────────────────────────────────────
 
 function fmt(dateStr: string | null | undefined, opts?: Intl.DateTimeFormatOptions): string {
@@ -626,7 +648,43 @@ export default async function HivePage({ params, searchParams }: Props) {
                 <span style={{ ...PILL, background: statusBadge.bg, color: statusBadge.color, fontSize: '0.7rem' }}>
                   {hive.status}
                 </span>
+                <Link
+                  href={`/apiary/${hiveId}/edit`}
+                  style={{ fontFamily: 'var(--font-dm-sans), sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.55)', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 4, padding: '0.2rem 0.65rem' }}
+                >
+                  Edit
+                </Link>
               </div>
+
+              {/* Origin info */}
+              {hive.origin_type && (
+                <div style={{ marginTop: '0.65rem', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+                  <div>
+                    <span style={{ fontFamily: 'var(--font-dm-sans), sans-serif', fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.15rem' }}>Origin</span>
+                    <span style={{ fontFamily: 'var(--font-dm-sans), sans-serif', fontSize: '0.82rem', color: 'rgba(255,255,255,0.75)' }}>
+                      {ORIGIN_LABEL[hive.origin_type] ?? hive.origin_type}
+                    </span>
+                  </div>
+                  {hive.origin_source && (
+                    <div>
+                      <span style={{ fontFamily: 'var(--font-dm-sans), sans-serif', fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.15rem' }}>
+                        {ORIGIN_SOURCE_LABEL[hive.origin_type] ?? 'Source'}
+                      </span>
+                      <span style={{ fontFamily: 'var(--font-dm-sans), sans-serif', fontSize: '0.82rem', color: 'rgba(255,255,255,0.75)' }}>
+                        {hive.origin_source}
+                      </span>
+                    </div>
+                  )}
+                  {hive.origin_date && (
+                    <div>
+                      <span style={{ fontFamily: 'var(--font-dm-sans), sans-serif', fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.15rem' }}>Acquired</span>
+                      <span style={{ fontFamily: 'var(--font-dm-sans), sans-serif', fontSize: '0.82rem', color: 'rgba(255,255,255,0.75)' }}>
+                        {fmt(hive.origin_date)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Quick stats */}

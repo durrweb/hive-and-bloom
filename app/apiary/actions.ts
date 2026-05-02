@@ -36,11 +36,15 @@ export async function addHive(_prev: ActionState, formData: FormData): Promise<A
     .from('hives')
     .insert({
       name,
-      location:  (formData.get('location')  as string)?.trim() || null,
-      hive_type: (formData.get('hive_type') as string) || null,
-      notes:     (formData.get('notes')     as string)?.trim() || null,
-      user_id:   user.id,
-      status:    'active',
+      location:      (formData.get('location')      as string)?.trim() || null,
+      hive_type:     (formData.get('hive_type')     as string) || null,
+      notes:         (formData.get('notes')         as string)?.trim() || null,
+      origin_type:   (formData.get('origin_type')   as string) || null,
+      origin_source: (formData.get('origin_source') as string)?.trim() || null,
+      origin_date:   (formData.get('origin_date')   as string) || null,
+      origin_notes:  (formData.get('origin_notes')  as string)?.trim() || null,
+      user_id:       user.id,
+      status:        'active',
     })
     .select('id')
     .single()
@@ -49,6 +53,40 @@ export async function addHive(_prev: ActionState, formData: FormData): Promise<A
 
   revalidatePath('/apiary')
   redirect(`/apiary/${data.id}`)
+}
+
+export async function updateHive(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const hiveId = formData.get('hiveId') as string
+  if (!await assertHiveOwner(supabase as any, hiveId, user.id))
+    return { error: 'Hive not found.' }
+
+  const name = (formData.get('name') as string)?.trim()
+  if (!name) return { error: 'Hive name is required.' }
+
+  const { error } = await (supabase as any)
+    .from('hives')
+    .update({
+      name,
+      location:      (formData.get('location')      as string)?.trim() || null,
+      hive_type:     (formData.get('hive_type')     as string) || null,
+      notes:         (formData.get('notes')         as string)?.trim() || null,
+      origin_type:   (formData.get('origin_type')   as string) || null,
+      origin_source: (formData.get('origin_source') as string)?.trim() || null,
+      origin_date:   (formData.get('origin_date')   as string) || null,
+      origin_notes:  (formData.get('origin_notes')  as string)?.trim() || null,
+    })
+    .eq('id', hiveId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/apiary')
+  revalidatePath(`/apiary/${hiveId}`)
+  redirect(`/apiary/${hiveId}`)
 }
 
 export async function updateHiveStatus(hiveId: string, status: HiveStatus): Promise<void> {

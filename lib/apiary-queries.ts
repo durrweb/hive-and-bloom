@@ -21,6 +21,11 @@ export interface Hive {
   super_count: number
   active_treatment_count: number
   queen_status: QueenStatus | null
+  // origin fields
+  origin_type: string | null
+  origin_source: string | null
+  origin_date: string | null
+  origin_notes: string | null
 }
 
 export interface Inspection {
