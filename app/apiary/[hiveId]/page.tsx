@@ -4,9 +4,13 @@ import Link from 'next/link'
 import { getCurrentUser } from '@/lib/queries'
 import {
   getHive, getQueen, getInspections, getSupers, getTreatments, getReminders,
+  getHivePhotos, getInspectionPhotosByHive,
   type Hive, type Inspection, type Queen, type Super, type Treatment, type Reminder,
+  type HivePhoto, type InspectionPhoto,
 } from '@/lib/apiary-queries'
+import { getUserTier } from '@/lib/tier'
 import { removeSuper, completeReminder } from '@/app/apiary/actions'
+import HivePhotoManager from '@/app/apiary/HivePhotoManager'
 
 // ── Metadata ──────────────────────────────────────────────────────────────────
 
@@ -19,7 +23,7 @@ interface Props {
   searchParams: Promise<{ tab?: string }>
 }
 
-const TABS = ['inspections', 'queen', 'supers', 'treatments', 'reminders'] as const
+const TABS = ['inspections', 'queen', 'supers', 'treatments', 'reminders', 'photos'] as const
 type Tab = typeof TABS[number]
 
 // ── Formatting helpers ────────────────────────────────────────────────────────
@@ -94,7 +98,7 @@ function EmptyState({ icon, heading, sub, cta }: { icon: string; heading: string
 
 // ── Tab: Inspections ─────────────────────────────────────────────────────────
 
-function InspectionsTab({ hiveId, inspections }: { hiveId: string; inspections: Inspection[] }) {
+function InspectionsTab({ hiveId, inspections, inspectionPhotos }: { hiveId: string; inspections: Inspection[]; inspectionPhotos: Record<string, InspectionPhoto[]> }) {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
@@ -192,6 +196,14 @@ function InspectionsTab({ hiveId, inspections }: { hiveId: string; inspections: 
                   <p style={{ fontFamily: 'var(--font-crimson), Georgia, serif', fontSize: '0.95rem', color: 'var(--mist)', margin: 0, lineHeight: 1.5, borderTop: '1px solid var(--cream-dark)', paddingTop: '0.65rem' }}>
                     {insp.notes}
                   </p>
+                )}
+
+                {inspectionPhotos[insp.id]?.length > 0 && (
+                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.65rem', paddingTop: '0.65rem', borderTop: '1px solid var(--cream-dark)' }}>
+                    {inspectionPhotos[insp.id].map(p => (
+                      <img key={p.id} src={p.url} alt="" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 5, display: 'block' }} />
+                    ))}
+                  </div>
                 )}
               </div>
             )
@@ -552,14 +564,18 @@ export default async function HivePage({ params, searchParams }: Props) {
 
   // Always fetch hive (ownership check) + queen (needed by two tabs)
   // Fetch tab-specific data in the same round-trip
-  const [hive, queen, inspections, supers, treatments, reminders] = await Promise.all([
+  const [hive, queen, inspections, supers, treatments, reminders, hivePhotos, inspectionPhotos, tier] = await Promise.all([
     getHive(hiveId, user.id),
     getQueen(hiveId, user.id),
-    activeTab === 'inspections' ? getInspections(hiveId, user.id) : Promise.resolve([]),
-    activeTab === 'supers'      ? getSupers(hiveId, user.id)      : Promise.resolve([]),
-    activeTab === 'treatments'  ? getTreatments(hiveId, user.id)  : Promise.resolve([]),
-    activeTab === 'reminders'   ? getReminders(hiveId, user.id)   : Promise.resolve([]),
+    activeTab === 'inspections' ? getInspections(hiveId, user.id)            : Promise.resolve([]),
+    activeTab === 'supers'      ? getSupers(hiveId, user.id)                 : Promise.resolve([]),
+    activeTab === 'treatments'  ? getTreatments(hiveId, user.id)             : Promise.resolve([]),
+    activeTab === 'reminders'   ? getReminders(hiveId, user.id)              : Promise.resolve([]),
+    activeTab === 'photos'      ? getHivePhotos(hiveId, user.id)             : Promise.resolve([] as HivePhoto[]),
+    activeTab === 'inspections' ? getInspectionPhotosByHive(hiveId, user.id) : Promise.resolve({} as Record<string, InspectionPhoto[]>),
+    activeTab === 'photos'      ? getUserTier(user.id)                       : Promise.resolve('free' as const),
   ])
+  const isPro = tier === 'pro'
 
   // Ownership check: getHive filters by user_id; null means not found or not owned
   if (!hive) redirect('/apiary')
@@ -576,6 +592,7 @@ export default async function HivePage({ params, searchParams }: Props) {
     { id: 'supers',      label: 'Supers' },
     { id: 'treatments',  label: 'Treatments' },
     { id: 'reminders',   label: 'Reminders', pro: true },
+    { id: 'photos',      label: 'Photos',    pro: true },
   ] as const
 
   return (
@@ -667,11 +684,12 @@ export default async function HivePage({ params, searchParams }: Props) {
 
       {/* Tab content */}
       <div className="container mx-auto px-5 lg:px-8" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
-        {activeTab === 'inspections' && <InspectionsTab hiveId={hiveId} inspections={inspections} />}
+        {activeTab === 'inspections' && <InspectionsTab hiveId={hiveId} inspections={inspections} inspectionPhotos={inspectionPhotos} />}
         {activeTab === 'queen'       && <QueenTab       hiveId={hiveId} queen={queen} />}
         {activeTab === 'supers'      && <SupersTab      hiveId={hiveId} supers={supers} />}
         {activeTab === 'treatments'  && <TreatmentsTab  hiveId={hiveId} treatments={treatments} />}
         {activeTab === 'reminders'   && <RemindersTab   hiveId={hiveId} reminders={reminders} />}
+        {activeTab === 'photos'      && <HivePhotoManager hiveId={hiveId} userId={user.id} initialPhotos={hivePhotos} isPro={isPro} />}
       </div>
     </div>
   )

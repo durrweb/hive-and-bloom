@@ -85,7 +85,7 @@ export async function logInspection(_prev: ActionState, formData: FormData): Pro
     return v ? parseFloat(v) : null
   }
 
-  const { error } = await (supabase as any).from('inspections').insert({
+  const { data: inspData, error } = await (supabase as any).from('inspections').insert({
     hive_id:        hiveId,
     user_id:        user.id,
     inspected_at,
@@ -99,9 +99,22 @@ export async function logInspection(_prev: ActionState, formData: FormData): Pro
     weather:        formData.get('weather') || null,
     weight_kg:      toFloat('weight_kg'),
     notes:          (formData.get('notes') as string)?.trim() || null,
-  })
+  }).select('id').single()
 
   if (error) return { error: error.message }
+
+  // Save inspection photos (Pro only)
+  const photoUrls  = formData.getAll('photo_urls')  as string[]
+  const photoPaths = formData.getAll('photo_paths') as string[]
+  if (photoUrls.length > 0) {
+    const tier = await getUserTier(user.id)
+    if (tier === 'pro') {
+      const rows = photoUrls
+        .map((url, i) => ({ inspection_id: inspData.id, hive_id: hiveId, user_id: user.id, url, storage_path: photoPaths[i] ?? '' }))
+        .filter(r => r.url && r.storage_path)
+      if (rows.length) await (supabase as any).from('inspection_photos').insert(rows)
+    }
+  }
 
   revalidatePath('/apiary')
   revalidatePath(`/apiary/${hiveId}`)
@@ -270,6 +283,54 @@ export async function addReminder(_prev: ActionState, formData: FormData): Promi
   revalidatePath('/apiary')
   revalidatePath(`/apiary/${hiveId}`)
   redirect(`/apiary/${hiveId}?tab=reminders`)
+}
+
+// ── Photos ────────────────────────────────────────────────────────────────────
+
+type PhotoResult = { id: string; url: string; storage_path: string; created_at: string } | { error: string }
+
+export async function saveHivePhoto(hiveId: string, url: string, storagePath: string): Promise<PhotoResult> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const tier = await getUserTier(user.id)
+  if (tier !== 'pro') return { error: 'Photos are a Pro feature. Upgrade to unlock.' }
+
+  if (!await assertHiveOwner(supabase as any, hiveId, user.id))
+    return { error: 'Hive not found.' }
+
+  const { data, error } = await (supabase as any)
+    .from('hive_photos')
+    .insert({ hive_id: hiveId, user_id: user.id, url, storage_path: storagePath })
+    .select('id, url, storage_path, created_at')
+    .single()
+
+  if (error) return { error: error.message }
+
+  revalidatePath(`/apiary/${hiveId}`)
+  return data
+}
+
+export async function deleteHivePhoto(photoId: string): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const { data: photo } = await (supabase as any)
+    .from('hive_photos')
+    .select('hive_id, storage_path')
+    .eq('id', photoId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!photo) return { error: 'Photo not found.' }
+
+  await (supabase as any).storage.from('hive-photos').remove([photo.storage_path])
+  await (supabase as any).from('hive_photos').delete().eq('id', photoId).eq('user_id', user.id)
+
+  revalidatePath(`/apiary/${photo.hive_id}`)
+  return {}
 }
 
 export async function completeReminder(reminderId: string): Promise<void> {

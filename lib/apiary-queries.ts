@@ -193,3 +193,53 @@ export async function getUserHiveCount(userId: string): Promise<number> {
   if (error) { console.error('getUserHiveCount:', error); return 0 }
   return count ?? 0
 }
+
+// ── Photos ──────────────────────────────────────────────────────────────────
+
+export interface HivePhoto {
+  id: string
+  hive_id: string
+  user_id: string
+  url: string
+  storage_path: string
+  created_at: string
+}
+
+export interface InspectionPhoto {
+  id: string
+  inspection_id: string
+  hive_id: string
+  user_id: string
+  url: string
+  storage_path: string
+  created_at: string
+}
+
+export async function getHivePhotos(hiveId: string, userId: string): Promise<HivePhoto[]> {
+  const supabase = await createClient()
+  const { data, error } = await (supabase as any)
+    .from('hive_photos')
+    .select('*')
+    .eq('hive_id', hiveId)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  if (error) { console.error('getHivePhotos:', error); return [] }
+  return (data as HivePhoto[]) ?? []
+}
+
+export async function getInspectionPhotosByHive(hiveId: string, userId: string): Promise<Record<string, InspectionPhoto[]>> {
+  const supabase = await createClient()
+  const { data, error } = await (supabase as any)
+    .from('inspection_photos')
+    .select('*')
+    .eq('hive_id', hiveId)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: true })
+  if (error) { console.error('getInspectionPhotos:', error); return {} }
+  const result: Record<string, InspectionPhoto[]> = {}
+  for (const photo of (data as InspectionPhoto[]) ?? []) {
+    if (!result[photo.inspection_id]) result[photo.inspection_id] = []
+    result[photo.inspection_id].push(photo)
+  }
+  return result
+}
