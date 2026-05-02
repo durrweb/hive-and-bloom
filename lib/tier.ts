@@ -5,10 +5,11 @@ export async function getUserTier(userId: string): Promise<'free' | 'pro'> {
   const supabase = await createClient()
   const { data, error } = await (supabase as any)
     .from('profile_tier')
-    .select('tier')
+    .select('tier, pro_granted_reason')
     .eq('user_id', userId)
     .single()
-  if (error || !data) return 'pro'
+  if (error || !data) return 'free'
+  if (data.pro_granted_reason === 'founding_member') return 'pro'
   return data.tier === 'pro' ? 'pro' : 'free'
 }
 
