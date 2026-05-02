@@ -124,6 +124,7 @@ const [{ data: bookmarks }, { data: recentComments }] = await Promise.all([
           <h2 className="dashboard-section-title">Quick Links</h2>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             {[
+              { href: '/apiary',   label: '🐝 My Apiary' },
               { href: '/articles', label: '📰 Browse Articles' },
               { href: '/recipes',  label: '🍯 Browse Recipes' },
               { href: '/calendar', label: '📅 Seasonal Calendar' },

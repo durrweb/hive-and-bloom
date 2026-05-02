@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { FREE_HIVE_LIMIT } from '@/lib/tier'
+import { FREE_HIVE_LIMIT } from '@/lib/apiary-constants'
 
 export default function AddHiveButton({ atFreeLimit }: { atFreeLimit: boolean }) {
   const [showModal, setShowModal] = useState(false)

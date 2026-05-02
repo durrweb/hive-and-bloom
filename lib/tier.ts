@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-
-export const FREE_HIVE_LIMIT = 3
+export { FREE_HIVE_LIMIT } from '@/lib/apiary-constants'
 
 export async function getUserTier(userId: string): Promise<'free' | 'pro'> {
   const supabase = await createClient()
