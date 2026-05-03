@@ -22,7 +22,8 @@
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "remark-rehype": "^11.1.2",
-    "resend": "^6.12.2"
+    "resend": "^6.12.2",
+    "svix": "^1.92.2"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
