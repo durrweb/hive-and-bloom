@@ -98,10 +98,23 @@ export async function getFeaturedRecipes(limit = 3): Promise<RecipeWithMeta[]> {
   return data ?? []
 }
 
-export async function getLatestRecipes(limit = 12, honeyVariety?: string): Promise<RecipeWithMeta[]> {
+export async function getLatestRecipes(
+  limit = 12,
+  honeyVariety?: string,
+  offset = 0,
+  season?: string,
+  difficulty?: string,
+): Promise<RecipeWithMeta[]> {
   const supabase = await createClient()
-  let query = supabase.from('published_recipes').select('*').limit(limit)
+  let query = supabase
+    .from('published_recipes')
+    .select('*')
+    .order('published_at', { ascending: false, nullsFirst: false })
+    .order('id', { ascending: false })
+    .range(offset, offset + limit - 1)
   if (honeyVariety) query = query.eq('honey_variety', honeyVariety)
+  if (season)       query = query.eq('season_best', season)
+  if (difficulty)   query = query.eq('difficulty', difficulty)
   const { data, error } = await query
   if (error) { console.error('getLatestRecipes:', error); return [] }
   return data ?? []

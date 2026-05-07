@@ -28,13 +28,29 @@ const CATEGORIES = [
 ]
 
 interface Props {
-  searchParams: Promise<{ honey?: string; season?: string }>
+  searchParams: Promise<{ honey?: string; season?: string; difficulty?: string; tag?: string; page?: string }>
 }
 
 export default async function RecipesPage({ searchParams }: Props) {
   const params = await searchParams
-  const honeyFilter = params.honey
-  const recipes = await getLatestRecipes(24, honeyFilter)
+  const honeyFilter      = params.honey
+  const seasonFilter     = params.season
+  const difficultyFilter = params.difficulty
+  const tagFilter        = params.tag
+  const page             = parseInt(params.page ?? '1', 10)
+  const pageSize         = 12
+  const offset           = (page - 1) * pageSize
+
+  const recipes = await getLatestRecipes(pageSize, honeyFilter, offset, seasonFilter, difficultyFilter)
+
+  // Build load-more URL preserving all active filters
+  const loadMoreParams = new URLSearchParams()
+  if (honeyFilter)      loadMoreParams.set('honey', honeyFilter)
+  if (seasonFilter)     loadMoreParams.set('season', seasonFilter)
+  if (difficultyFilter) loadMoreParams.set('difficulty', difficultyFilter)
+  if (tagFilter)        loadMoreParams.set('tag', tagFilter)
+  loadMoreParams.set('page', String(page + 1))
+  const loadMoreHref = `/recipes?${loadMoreParams.toString()}`
 
   return (
     <div>
@@ -43,7 +59,7 @@ export default async function RecipesPage({ searchParams }: Props) {
         <div className="container mx-auto px-5 lg:px-8">
           <span className="eyebrow">From the Hive to Your Table</span>
           <h1>Honey &amp; Herb Recipes</h1>
-          <p>Raw honey, beeswax, propolis, herbs, and wild-foraged flavors — {recipes.length > 0 ? `${recipes.length}+ recipes` : 'recipes'} for every season.</p>
+          <p>Raw honey, beeswax, propolis, herbs, and wild-foraged flavors — recipes for every season.</p>
         </div>
       </div>
 
@@ -103,6 +119,15 @@ export default async function RecipesPage({ searchParams }: Props) {
               <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--mist)' }}>
                 <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>No recipes found yet.</p>
                 <p style={{ fontSize: '0.9rem' }}>New recipes are added weekly — check back soon!</p>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {recipes.length === pageSize && (
+              <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+                <Link href={loadMoreHref} className="btn btn-primary">
+                  Load more recipes →
+                </Link>
               </div>
             )}
           </div>
